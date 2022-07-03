@@ -212,7 +212,108 @@ en esta caso vamos a iniciar con la parte grafica para ello contamos con 2 eleme
 ```
 
 
+5) creamos una funcion que nos inicia los SweetAlert a usar, en esta ocasion usaremos 4 sweet conexion exitosa, error en conexion, conexion pendiente y conexion perdida correspondientemente okSweet, errorSweet, loadSweet, disconnection.
+
+```kotlin
+private fun initSweet() {
+        loadSweet = SweetAlertDialog(this,SweetAlertDialog.PROGRESS_TYPE)
+        okSweet = SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
+        errorSweet = SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
+        disconnection = SweetAlertDialog(this,SweetAlertDialog.NORMAL_TYPE)
+
+        loadSweet.titleText = "Conectando"
+        loadSweet.setCancelable(false)
+        errorSweet.titleText = "Algo salio mal"
+
+        okSweet.titleText = "Conectado"
+        disconnection.titleText = "Desconectado"
+    }
+```
+
+6) luego de esto vamos a inicializar la parte grafica de la vista graph, para que todo esto funcione debemos decirle a la vista que las modificaciones las realizaremos de forma manual, es decir los ejes x (y) y maximos o minimos en nuestra grafica, o si deseamos que nuesta vista sea ajustable o reaccione a la interacción de nuestros dedos, para esta actividad tenemos dos objetos LineGrahSeries() uno para graficar el valor de una temperatura y otro para graficar el valor de un potenciometro.
+
+```kotlin
+ private fun initGraph() {
+        //permitime controlar los ejes manualmente
+        graph.viewport.isXAxisBoundsManual = true;
+        graph.viewport.setMinX(0.0);
+        graph.viewport.setMaxX(10.0);
+        graph.viewport.setMaxY(1024.0)
+        graph.viewport.setMinY(0.0)
+
+        //permite realizar zoom y ajustar posicion eje x
+        graph.viewport.isScalable = true
+        graph.viewport.setScalableY(true)
+
+        temperatura = LineGraphSeries()
+        //draw points
+        temperatura.isDrawDataPoints = true;
+        //draw below points
+        temperatura.isDrawBackground = true;
+        //color series
+        temperatura.color = Color.RED
+
+        potenciometro = LineGraphSeries()
+        //draw points
+        potenciometro.isDrawDataPoints = true;
+        //draw below points
+        potenciometro.isDrawBackground = true;
+        //color series
+        potenciometro.color = Color.BLUE
+
+        graph.addSeries(temperatura);
+        graph.addSeries(potenciometro)
+    }
 
 
+```
 
+7) las siguientes funciones realizan la operación de hacer invisible o no a las 2 views que se cuentan, es decir su interacción va desde mostrar la listView que contiene los dispositivos bluetooth a desaparecer la vista grafica graphview y tambien en el sentido inverso con la funcion invisibleListDevice()
 
+```kotlin
+/**
+     * invisible listDevice
+     */
+    private fun invisibleListDevice() {
+        containerGraph.visibility = View.VISIBLE
+        containerDevice.visibility = View.GONE
+        graphviewVisible = true
+        btnViewDevice.text = "DEVICE"
+    }
+
+    /**
+     * visible list device
+     */
+    private fun visibleListDevice() {
+        containerGraph.visibility = View.GONE
+        containerDevice.visibility = View.VISIBLE
+        graphviewVisible = false
+        btnViewDevice.text = "GraphView"
+
+    }
+```
+
+8)haciendo uso de la libreria bluJhr vamos a recibir los datos probenientes de arduino o cualquier microcontrolador con la funcion rxReceived(), esta cada vez que recibe un dato evalua si contiene una t o una p, t para temperatura, p para potenciometro, logrando asi generar un valor para agragarse a la respectiva serie de grafica lineal, las condiciones plasmadas en esta funcion separan los datos de llegada y adicionan un data point con el valor que ha llegado; DataPoint recibe 3 atributos, la posicion del eje X, los datos a graficar en el eje y, si desea que la actualizacion desate un scroll automatico al final y la cantidad de puntos que desea mostrar.
+
+```kotlin
+private fun rxReceived() {
+        blue.loadDateRx(object:BluJhr.ReceivedData{
+            override fun rxDate(rx: String) {
+                println("------------------- RX $rx --------------------")
+                ejeX+=0.6
+                if (rx.contains("t")){
+                    val date = rx.replace("t","")
+                    txtTemp.text = "Temp: $date"
+                    temperatura.appendData(DataPoint(ejeX, date.toDouble()), true, 22)
+                }else{
+                    if (rx.contains("p")){
+                        val date = rx.replace("p","")
+                        txtPot.text = "Pot: $date"
+                        potenciometro.appendData(DataPoint(ejeX, date.toDouble()), true, 22)
+                    }
+                }
+
+            }
+        })
+    }
+```
