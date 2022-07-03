@@ -29,6 +29,13 @@ implementation 'com.jjoe64:graphview:4.2.2'
 
 ```
 
+en settings.gradle para esta version de android ver el siguiente tutorial https://github.com/jose-jhr/blueJhrLibrary
+
+```
+ maven { url 'https://jitpack.io' }
+```
+
+
 Permite la conexion entre android y arduino
 
 ```
@@ -36,6 +43,15 @@ Permite la conexion entre android y arduino
 implementation 'com.github.jose-jhr:blueJhrLibrary:0.1.0'
 
 ```
+
+importante hacer que esta app tenga una orientacion horizontal usando la siguiente linea en el archivo AndroidManifest.xml
+
+```xml
+android:screenOrientation="landscape"
+```
+
+
+
 
 2) realiza los pasos de conexion bluetooth, usando la libreria BLUEJHR Disponible en el siguiente enlace https://github.com/jose-jhr/blueJhrLibrary
 en esta caso vamos a iniciar con la parte grafica para ello contamos con 2 elementos escenciales 
