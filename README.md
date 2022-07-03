@@ -182,6 +182,8 @@ en esta caso vamos a iniciar con la parte grafica para ello contamos con 2 eleme
 
 4) una vez ya tenemos la interfaz grafica completa, procederemos a inicializar algunas variables que usaremos
 
+Nota, se crearon antes del onCreate
+
 ```kotlin
 
   //bluetooth var
@@ -293,7 +295,7 @@ private fun initSweet() {
     }
 ```
 
-8)haciendo uso de la libreria bluJhr vamos a recibir los datos probenientes de arduino o cualquier microcontrolador con la funcion rxReceived(), esta cada vez que recibe un dato evalua si contiene una t o una p, t para temperatura, p para potenciometro, logrando asi generar un valor para agragarse a la respectiva serie de grafica lineal, las condiciones plasmadas en esta funcion separan los datos de llegada y adicionan un data point con el valor que ha llegado; DataPoint recibe 3 atributos, la posicion del eje X, los datos a graficar en el eje y, si desea que la actualizacion desate un scroll automatico al final y la cantidad de puntos que desea mostrar.
+8) haciendo uso de la libreria bluJhr vamos a recibir los datos probenientes de arduino o cualquier microcontrolador con la funcion rxReceived(), esta cada vez que recibe un dato evalua si contiene una t o una p, t para temperatura, p para potenciometro, logrando asi generar un valor para agragarse a la respectiva serie de grafica lineal, las condiciones plasmadas en esta funcion separan los datos de llegada y adicionan un data point con el valor que ha llegado; DataPoint recibe 3 atributos, la posicion del eje X, los datos a graficar en el eje y, si desea que la actualizacion desate un scroll automatico al final y la cantidad de puntos que desea mostrar.
 
 ```kotlin
 private fun rxReceived() {
@@ -317,3 +319,121 @@ private fun rxReceived() {
         })
     }
 ```
+
+9) las siguientes dos funciones estan realizadas con el fin de tener una conexion exitosa en bluetooth ver https://github.com/jose-jhr/blueJhrLibrary para mayor informacion.
+
+```kotlin
+ override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if (!blue.stateBluetoooth() && requestCode == 100){
+            blue.initializeBluetooth()
+        }else{
+            if (requestCode == 100){
+                devicesBluetooth = blue.deviceBluetooth()
+                if (devicesBluetooth.isNotEmpty()){
+                    val adapter = ArrayAdapter(this,android.R.layout.simple_expandable_list_item_1,devicesBluetooth)
+                    listDeviceBluetooth.adapter = adapter
+                }else{
+                    Toast.makeText(this, "No tienes vinculados dispositivos", Toast.LENGTH_SHORT).show()
+                }
+
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (blue.checkPermissions(requestCode,grantResults)){
+            Toast.makeText(this, "Exit", Toast.LENGTH_SHORT).show()
+            blue.initializeBluetooth()
+        }else{
+            if(Build.VERSION.SDK_INT < Build.VERSION_CODES.S){
+                blue.initializeBluetooth()
+            }else{
+                Toast.makeText(this, "Algo salio mal", Toast.LENGTH_SHORT).show()
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+```
+
+10) una vez ya creamos las funciones necesarias para tener exitor en graficar datos provenientes de arduino o cualquier microcontrolador usando Bluetooth
+vamos a usar todas la funciones y objetos anteriormente inicializados.
+
+Nota: las siguientes lineas de codigo van dentro del onCreate()
+
+```kotlin
+
+        //init var sweetAlert
+        initSweet()
+
+        blue = BluJhr(this)
+        blue.onBluetooth()
+
+        btnViewDevice.setOnClickListener {
+            when (graphviewVisible) {
+                false -> invisibleListDevice()
+                true -> visibleListDevice()
+            }
+        }
+
+        listDeviceBluetooth.setOnItemClickListener { adapterView, view, i, l ->
+            if (devicesBluetooth.isNotEmpty()) {
+                blue.connect(devicesBluetooth[i])
+                //genera error si no se vuelve a iniciar los objetos sweet
+                initSweet()
+                blue.setDataLoadFinishedListener(object : BluJhr.ConnectedBluetooth {
+                    override fun onConnectState(state: BluJhr.Connected) {
+                        stateConn = state
+                        when (state) {
+                            BluJhr.Connected.True -> {
+                                loadSweet.dismiss()
+                                okSweet.show()
+                                invisibleListDevice()
+                                rxReceived()
+                            }
+
+                            BluJhr.Connected.Pending -> {
+                                loadSweet.show()
+                            }
+
+                            BluJhr.Connected.False -> {
+                                loadSweet.dismiss()
+                                errorSweet.show()
+                            }
+
+                            BluJhr.Connected.Disconnect -> {
+                                loadSweet.dismiss()
+                                disconnection.show()
+                                visibleListDevice()
+                            }
+
+                        }
+                    }
+                })
+            }
+        }
+
+        //graphview
+        initGraph()
+
+        btnInitStop.setOnClickListener {
+            if (stateConn == BluJhr.Connected.True){
+                initGraph = when(initGraph){
+                    true->{
+                        blue.bluTx("0")
+                        btnInitStop.text = "START"
+                        false
+                    }
+                    false->{
+                        blue.bluTx("1")
+                        btnInitStop.text = "STOP"
+                        true
+                    }
+                }
+            }
+        }
+
+```
+
+
+Gracias por tu apoyo, si aun no te has suscrito te invito a que lo hagas en https://www.youtube.com/ingenieriajhr.
