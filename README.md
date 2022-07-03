@@ -4,6 +4,9 @@ GRAFICAR  DATOS PROVENIENTES DESDE ARDUINO CON ANDROID
 
 ![5](https://user-images.githubusercontent.com/66834393/177058447-7d51e8c5-ab95-44dd-8a31-81ef6b10263a.png)
 
+![proteus](https://user-images.githubusercontent.com/66834393/177059823-0483fa3a-29db-4897-9af0-03b257dda425.png)
+
+
 para graficar datos provenientes de arduino en android realiza los siguiente pasos.
 
 
@@ -231,6 +234,10 @@ private fun initSweet() {
         disconnection.titleText = "Desconectado"
     }
 ```
+
+![4](https://user-images.githubusercontent.com/66834393/177059844-07d12755-6e5a-4fdf-913f-e297566a3516.png)
+![3](https://user-images.githubusercontent.com/66834393/177059850-98fb45bc-6c8b-424a-abf7-315d0b91a0f0.png)
+
 
 6) luego de esto vamos a inicializar la parte grafica de la vista graph, para que todo esto funcione debemos decirle a la vista que las modificaciones las realizaremos de forma manual, es decir los ejes x (y) y maximos o minimos en nuestra grafica, o si deseamos que nuesta vista sea ajustable o reaccione a la interacción de nuestros dedos, para esta actividad tenemos dos objetos LineGrahSeries() uno para graficar el valor de una temperatura y otro para graficar el valor de un potenciometro.
 
