@@ -277,6 +277,8 @@ private fun initSweet() {
         temperatura.isDrawBackground = true;
         //color series
         temperatura.color = Color.RED
+        
+  
 
         potenciometro = LineGraphSeries()
         //draw points
@@ -285,6 +287,12 @@ private fun initSweet() {
         potenciometro.isDrawBackground = true;
         //color series
         potenciometro.color = Color.BLUE
+        
+        //opcionales
+        //potenciometro.setTitle("pot")
+        //temperatura.setTitle("temp")
+        //graph.getLegendRender().setVisible(true)
+        //graph.getLegendRender().setAlign(LegenderRender.LegendAlign.TOP)
 
         graph.addSeries(temperatura);
         graph.addSeries(potenciometro)
